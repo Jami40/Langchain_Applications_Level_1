@@ -14,6 +14,7 @@
 The current projects focus on:
 
 - 🤖 Conversational AI and chatbot applications
+- 🗃️ Natural-language question answering over SQL databases
 - 🧾 Structured data extraction from unstructured text
 - 🧪 Small, focused experiments that can become standalone applications
 
@@ -22,6 +23,7 @@ The current projects focus on:
 | Application | Description | Entry point |
 |---|---|---|
 | 🤖 **ChatBot** | Simple and advanced LangChain chatbots with conversation and session memory | [`ChatBot/`](./ChatBot/) |
+| 🗃️ **QA From SQL** | Ask natural-language questions about SQLite data using LangChain and Groq | [`QA_From_SQL/QA_From_SQL.ipynb`](./QA_From_SQL/QA_From_SQL.ipynb) |
 | 🧾 **Data Extraction** | Extract structured information from unstructured text | [`Data_Extraction/Key_Data_Extraction.ipynb`](./Data_Extraction/Key_Data_Extraction.ipynb) |
 
 ### ChatBot
@@ -32,6 +34,28 @@ The `ChatBot` folder currently contains:
 - [`Advanced-Chatbot.ipynb`](./ChatBot/Advanced-Chatbot.ipynb) — a chatbot with session-based and limited memory
 - [`messages.json`](./ChatBot/messages.json) — local conversation data used by the applications
 
+### QA From SQL
+
+The [`QA_From_SQL.ipynb`](./QA_From_SQL/QA_From_SQL.ipynb) notebook demonstrates a natural-language Q&A pipeline over SQLite:
+
+1. Generate a SQL query from a user question.
+2. Extract the raw SQL from the model's `SQLQuery:` response.
+3. Execute the SQL against the database.
+4. Convert the result into a natural-language answer.
+
+The current dataset is [`street_tree_db.sqlite`](./QA_From_SQL/data/street_tree_db.sqlite). It contains a `street_trees` table with fields such as `qSpecies`, `qAddress`, `PlantType`, `qCaretaker`, ZIP codes, neighborhoods, and geographic coordinates. The dataset already represents San Francisco street-tree records, so questions should refer to records in the `street_trees` table rather than filtering by a city column that does not exist.
+
+Example questions:
+
+```text
+How many distinct tree species are recorded in the street_trees table?
+Which are the five most common tree species?
+How many trees are maintained by DPW?
+List five tree species and their addresses.
+```
+
+The database currently contains 148 distinct tree species.
+
 ## Workspace structure
 
 ```text
@@ -40,11 +64,16 @@ Level_1_Applications/
 │   ├── Advanced-Chatbot.ipynb
 │   ├── Simple_Chatbot.ipynb
 │   └── messages.json
+├── QA_From_SQL/
+│   ├── QA_From_SQL.ipynb
+│   └── data/
+│       └── street_tree_db.sqlite
 ├── Data_Extraction/
 │   └── Key_Data_Extraction.ipynb
 ├── .env                  # Local secrets; never commit
 ├── .gitignore
 ├── requirements.txt      # Shared starting dependencies
+├── Python_Environment_Guide.docx
 └── README.md
 ```
 
@@ -145,7 +174,7 @@ chatbot = ChatGroq(model="openai/gpt-oss-120b")
 
 ## Dependency management
 
-The root [`requirements.txt`](./requirements.txt) currently contains the shared LangChain chatbot dependencies. When a new application needs additional packages:
+The root [`requirements.txt`](./requirements.txt) currently contains the shared LangChain, Groq, OpenAI, community, and environment-variable dependencies used by the chatbot and SQL Q&A applications. When a new application needs additional packages:
 
 1. Add only the required package and a compatible version.
 2. Document application-specific setup in that application's folder.
@@ -208,6 +237,16 @@ The terminal and notebook are using different Python interpreters. Recheck both 
 import sys
 print(sys.executable)
 ```
+
+### SQL Q&A returns no rows
+
+Check the database schema and ask questions using columns that actually exist. The street-tree database has no city column because the dataset already contains San Francisco records. Prefer questions such as:
+
+```text
+How many distinct tree species are recorded in the street_trees table?
+```
+
+If the generated SQL begins with `SQLQuery:`, remove that prefix before passing it to `QuerySQLDataBaseTool`. The SQL Q&A notebook uses a `RunnableLambda` extraction step for this purpose.
 
 ## Documentation
 
