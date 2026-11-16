@@ -15,6 +15,9 @@ The current projects focus on:
 
 - 🤖 Conversational AI and chatbot applications
 - 🗃️ Natural-language question answering over SQL databases
+- 📄 Question answering over PDF documents
+- 🧠 Retrieval-augmented generation and document retrieval
+- 📊 Text classification and sentiment analysis
 - 🧾 Structured data extraction from unstructured text
 - 🧪 Small, focused experiments that can become standalone applications
 
@@ -24,6 +27,10 @@ The current projects focus on:
 |---|---|---|
 | 🤖 **ChatBot** | Simple and advanced LangChain chatbots with conversation and session memory | [`ChatBot/`](./ChatBot/) |
 | 🗃️ **QA From SQL** | Ask natural-language questions about SQLite data using LangChain and Groq | [`QA_From_SQL/QA_From_SQL.ipynb`](./QA_From_SQL/QA_From_SQL.ipynb) |
+| 📄 **QA From PDF** | Ask questions about PDF documents using document loading, retrieval, and source citations | [`QA_FROM_PDF/QA_From_PDF.ipynb`](./QA_FROM_PDF/QA_From_PDF.ipynb) |
+| 🧠 **Simple RAG** | Build a basic Retrieval-Augmented Generation application over documents | [`Simple_RAG_Implementation/Simple_Rag_Application.ipynb`](./Simple_RAG_Implementation/Simple_Rag_Application.ipynb) |
+| 🔎 **Simple Retriever** | Retrieve relevant content from a text data source for document-focused questions | [`Simple_Retriever/Simple_Retriever_Application.ipynb`](./Simple_Retriever/Simple_Retriever_Application.ipynb) |
+| 📊 **Sentiment Analysis** | Classify text into sentiment or other user-defined labels | [`Sentiment_Analysis/Sentiment_Analysis.ipynb`](./Sentiment_Analysis/Sentiment_Analysis.ipynb) |
 | 🧾 **Data Extraction** | Extract structured information from unstructured text | [`Data_Extraction/Key_Data_Extraction.ipynb`](./Data_Extraction/Key_Data_Extraction.ipynb) |
 
 ### ChatBot
@@ -56,6 +63,24 @@ List five tree species and their addresses.
 
 The database currently contains 148 distinct tree species.
 
+### QA From PDF
+
+The [`QA_From_PDF.ipynb`](./QA_FROM_PDF/QA_From_PDF.ipynb) notebook builds a basic document Q&A application. It loads PDF content, creates a retrievable representation, and uses a RAG pipeline to answer questions with citations from the source material.
+
+The application data is stored in [`QA_FROM_PDF/data/`](./QA_FROM_PDF/data/). The notebook currently demonstrates PDF and text-based source material.
+
+### Simple RAG
+
+The [`Simple_Rag_Application.ipynb`](./Simple_RAG_Implementation/Simple_Rag_Application.ipynb) notebook demonstrates Retrieval-Augmented Generation: retrieve relevant document content first, then provide that content to an LLM to generate a grounded answer.
+
+### Simple Retriever
+
+The [`Simple_Retriever_Application.ipynb`](./Simple_Retriever/Simple_Retriever_Application.ipynb) notebook demonstrates the retrieval step independently over a text data source. It is a simpler foundation for understanding how document retrieval works before adding generation.
+
+### Sentiment Analysis
+
+The [`Sentiment_Analysis.ipynb`](./Sentiment_Analysis/Sentiment_Analysis.ipynb) notebook demonstrates text classification. The same pattern can be used for sentiment, language, style, topic, or category labels.
+
 ## Workspace structure
 
 ```text
@@ -68,6 +93,17 @@ Level_1_Applications/
 │   ├── QA_From_SQL.ipynb
 │   └── data/
 │       └── street_tree_db.sqlite
+├── QA_FROM_PDF/
+│   ├── QA_From_PDF.ipynb
+│   └── data/
+├── Simple_RAG_Implementation/
+│   ├── Simple_Rag_Application.ipynb
+│   └── data/
+├── Simple_Retriever/
+│   ├── Simple_Retriever_Application.ipynb
+│   └── data/
+├── Sentiment_Analysis/
+│   └── Sentiment_Analysis.ipynb
 ├── Data_Extraction/
 │   └── Key_Data_Extraction.ipynb
 ├── .env                  # Local secrets; never commit
@@ -140,10 +176,11 @@ Create a local `.env` file in the workspace root:
 E:\Level_1_Applications\.env
 ```
 
-For Groq-powered applications, add:
+Add the key required by the application you are running:
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 Load environment variables in Python:
@@ -164,13 +201,15 @@ Never commit API keys, passwords, tokens, or other secrets. The workspace `.giti
 4. Restart the kernel after installing or upgrading a package.
 5. Run cells from top to bottom.
 
-For the Groq chatbot, the model initialization is:
+For Groq-powered notebooks, model initialization follows this pattern:
 
 ```python
 from langchain_groq import ChatGroq
 
 chatbot = ChatGroq(model="openai/gpt-oss-120b")
 ```
+
+Some retrieval, PDF, and extraction notebooks use OpenAI-compatible components. Make sure `OPENAI_API_KEY` is available when running those notebooks.
 
 ## Dependency management
 
@@ -182,6 +221,20 @@ The root [`requirements.txt`](./requirements.txt) currently contains the shared 
 4. Restart the notebook kernel.
 
 As the workspace grows, applications with substantially different dependencies should use their own `requirements.txt` or environment rather than creating conflicts in the shared environment.
+
+Some notebooks also declare application-specific packages in their installation cells:
+
+| Application | Additional packages |
+|---|---|
+| QA From PDF | `pypdf`, `langchain-chroma` |
+| Simple RAG | `langchain-chroma`, `langchain-community`, `langchain-hub` |
+| ChatBot and SQL Q&A | `langchain-community` |
+
+Install these only when running the corresponding notebook:
+
+```powershell
+python -m pip install <package-name>
+```
 
 ## Adding a new application
 
